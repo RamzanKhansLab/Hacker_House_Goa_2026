@@ -2,7 +2,7 @@
 
 A mobile-first Frame / ID Card Generator for the Hacker House Goa 2026 shortlisting task.
 
-**Live URL:** Configure the deployment below, then add the Vercel URL here.
+**Live URL:** https://hacker-house-goa-2026-orcin.vercel.app/
 
 ## Implemented product
 
