@@ -6,6 +6,7 @@ import UploadDropzone from "./components/UploadDropzone";
 import { useCanvasRenderer } from "./hooks/useCanvasRenderer";
 import { useImageUpload } from "./hooks/useImageUpload";
 import { useShare } from "./hooks/useShare";
+import { useButtonSounds } from "./hooks/useButtonSounds";
 
 const initialCrop = { zoom: 1, position: { x: 0, y: 0 } };
 const initialBuilder = {
@@ -25,11 +26,13 @@ function downloadBlob(blob, filename) {
 }
 
 export default function App() {
+  useButtonSounds();
   const { imageAsset, processing, error, setError, selectFile } = useImageUpload();
   const [format, setFormat] = useState(FORMATS.PFP);
   const [crop, setCrop] = useState(initialCrop);
   const [builder, setBuilder] = useState(initialBuilder);
   const [exporting, setExporting] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
   const { canvasRef, getBlob } = useCanvasRenderer({
     image: imageAsset?.image,
     format,
@@ -60,6 +63,7 @@ export default function App() {
     try {
       const blob = await getBlob();
       downloadBlob(blob, format === FORMATS.ID_CARD ? "hh-goa-2026-builder.png" : "hh-goa-2026-pfp.png");
+      setDownloaded(true);
     } catch {
       setError("We couldn't export this graphic. Please try again.");
     } finally {
@@ -87,14 +91,15 @@ export default function App() {
         {!imageAsset ? (
           <section className="hero" aria-labelledby="hero-title">
             <div className="hero-grid" aria-hidden="true" />
-            <p className="eyebrow">HACKER HOUSE GOA / 2026</p>
-            <h1 id="hero-title">Your builder identity,<br /><em>framed for Goa.</em></h1>
-            <p className="hero-copy">Upload a photo. We’ll compose a high-res frame on your device — ready for your profile, post, or next protocol.</p>
+            <p className="eyebrow">GOA, INDIA · 28—31 OCT 2026</p>
+            <div className="signal-orbit" aria-hidden="true"><span>247</span><i>BUILD · SHIP · REPEAT · </i></div>
+            <h1 id="hero-title"><span>CLAIM YOUR</span><em>BUILDER ID.</em><b>HH GOA / 2026</b></h1>
+            <p className="hero-copy">Your beachside builder passport. Upload a portrait, claim your class, and take the signal to the timeline.</p>
             <UploadDropzone onFile={handleFile} processing={processing} />
             <div className="hero-signals" aria-label="Product benefits">
-              <span><i aria-hidden="true">01</i>ON-DEVICE RENDERING</span>
+              <span><i aria-hidden="true">01</i>LOCAL RENDER</span>
               <span><i aria-hidden="true">02</i>NO SIGN-UP</span>
-              <span><i aria-hidden="true">03</i>1080PX EXPORT</span>
+              <span><i aria-hidden="true">03</i>POST READY</span>
             </div>
           </section>
         ) : (
@@ -114,15 +119,25 @@ export default function App() {
             onShare={handleShare}
             sharing={sharing || exporting}
             shareMessage={shareMessage}
+            downloaded={downloaded}
           />
         )}
 
         {error && <p className="error-banner" role="alert">{error}</p>}
       </main>
+      <section className="journey" aria-labelledby="journey-title">
+        <p className="journey-kicker">FROM CAMERA ROLL TO TIMELINE</p>
+        <h2 id="journey-title">ONE PHOTO.<br /><em>FULL SIGNAL.</em></h2>
+        <div className="journey-steps">
+          <article><span>01</span><h3>UPLOAD</h3><p>Choose any clear photo. Portrait, landscape or slightly off-centre — the crop is ready for it.</p></article>
+          <article><span>02</span><h3>MAKE IT YOURS</h3><p>Pick a frame, shape your portrait and add the builder details that make it yours.</p></article>
+          <article><span>03</span><h3>PUT IT OUT</h3><p>Download a crisp PNG or share straight to X with <strong>#FrameInGoa</strong> pre-filled.</p></article>
+        </div>
+      </section>
       <footer className="site-footer">
-        <span>HH GOA 2026</span>
-        <span>{explorerLabel} / AI × CRYPTO × MULTICHAIN</span>
-        <span>BUILT TO SHIP</span>
+        <span>HH GOA / 2026</span>
+        <span>{explorerLabel} · 28—31 OCT · GOA, INDIA</span>
+        <span>LESS NOISE. MORE SIGNAL.</span>
       </footer>
     </div>
   );

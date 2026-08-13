@@ -16,25 +16,25 @@ export function pfpPhotoBounds() {
 }
 
 export function drawBackground(context, size) {
-  context.fillStyle = "#061a19";
+  context.fillStyle = "#00613c";
   context.fillRect(0, 0, size, size);
 
   const aquaGlow = context.createRadialGradient(size * 0.14, size * 0.06, 8, size * 0.14, size * 0.06, size * 0.7);
-  aquaGlow.addColorStop(0, "rgba(71, 255, 205, 0.31)");
-  aquaGlow.addColorStop(0.48, "rgba(14, 137, 119, 0.16)");
-  aquaGlow.addColorStop(1, "rgba(6, 26, 25, 0)");
+  aquaGlow.addColorStop(0, "rgba(255, 231, 25, 0.32)");
+  aquaGlow.addColorStop(0.48, "rgba(255, 231, 25, 0.12)");
+  aquaGlow.addColorStop(1, "rgba(0, 97, 60, 0)");
   context.fillStyle = aquaGlow;
   context.fillRect(0, 0, size, size);
 
   const coralGlow = context.createRadialGradient(size * 0.89, size * 0.91, 0, size * 0.89, size * 0.91, size * 0.55);
-  coralGlow.addColorStop(0, "rgba(255, 126, 91, 0.24)");
-  coralGlow.addColorStop(0.6, "rgba(194, 70, 85, 0.08)");
-  coralGlow.addColorStop(1, "rgba(6, 26, 25, 0)");
+  coralGlow.addColorStop(0, "rgba(255, 0, 115, 0.28)");
+  coralGlow.addColorStop(0.6, "rgba(255, 0, 115, 0.08)");
+  coralGlow.addColorStop(1, "rgba(0, 97, 60, 0)");
   context.fillStyle = coralGlow;
   context.fillRect(0, 0, size, size);
 
   context.save();
-  context.strokeStyle = "rgba(194, 255, 232, 0.09)";
+  context.strokeStyle = "rgba(245, 241, 232, 0.08)";
   context.lineWidth = 1;
   for (let point = 20; point < size; point += 36) {
     context.beginPath();
@@ -51,7 +51,7 @@ export function drawBackground(context, size) {
 
 function drawCorner(context, x, y, directionX, directionY) {
   context.save();
-  context.strokeStyle = "#b8ffe1";
+  context.strokeStyle = "#ffe719";
   context.lineWidth = 7;
   context.lineCap = "square";
   context.beginPath();
@@ -59,7 +59,7 @@ function drawCorner(context, x, y, directionX, directionY) {
   context.lineTo(x, y);
   context.lineTo(x, y + directionY * 66);
   context.stroke();
-  context.strokeStyle = "#ff8f71";
+  context.strokeStyle = "#ff0073";
   context.lineWidth = 3;
   context.beginPath();
   context.moveTo(x + directionX * 92, y + directionY * 16);
@@ -71,7 +71,7 @@ function drawCorner(context, x, y, directionX, directionY) {
 function drawSignalMark(context, x, y) {
   context.save();
   context.translate(x, y);
-  context.strokeStyle = "rgba(190, 255, 226, 0.82)";
+  context.strokeStyle = "rgba(245, 241, 232, 0.82)";
   context.lineWidth = 4;
   for (let index = 0; index < 3; index += 1) {
     const radius = 15 + index * 14;
@@ -79,7 +79,7 @@ function drawSignalMark(context, x, y) {
     context.arc(0, 0, radius, -Math.PI * 0.78, Math.PI * 0.12);
     context.stroke();
   }
-  context.fillStyle = "#ff8f71";
+  context.fillStyle = "#ff0073";
   context.beginPath();
   context.arc(0, 0, 5, 0, Math.PI * 2);
   context.fill();
@@ -112,18 +112,18 @@ export function drawPfpFrame(context) {
 
   drawText(context, "HACKER // HOUSE", 78, 60, {
     font: "700 23px Arial, sans-serif",
-    color: "#c5ffe5",
+    color: "#fffbe8",
     tracking: 2.2,
   });
   drawText(context, "GOA • 2026", 1000, 60, {
     font: "700 23px Arial, sans-serif",
-    color: "#ffad95",
+    color: "#ffe719",
     tracking: 2.2,
     align: "right",
   });
 
   context.save();
-  context.fillStyle = "rgba(5, 27, 25, 0.88)";
+  context.fillStyle = "rgba(0, 75, 49, 0.92)";
   context.fillRect(75, 784, 930, 118);
   context.strokeStyle = "rgba(186, 255, 225, 0.32)";
   context.lineWidth = 1;
@@ -135,7 +135,7 @@ export function drawPfpFrame(context) {
 
   drawText(context, "HH", 94, 847, {
     font: "900 78px Arial Black, Arial, sans-serif",
-    color: "#d8ffec",
+    color: "#ffe719",
     tracking: -6,
   });
   drawText(context, "GOA / 26", 251, 824, {
@@ -145,12 +145,12 @@ export function drawPfpFrame(context) {
   });
   drawText(context, "BUILDER RESIDENCY", 254, 857, {
     font: "700 16px Arial, sans-serif",
-    color: "#9ee4c5",
+    color: "#d7ff3f",
     tracking: 3.1,
   });
   drawText(context, "AI × CRYPTO × MULTICHAIN", 976, 858, {
     font: "700 17px Arial, sans-serif",
-    color: "#ffb49d",
+    color: "#ff57a2",
     tracking: 1.2,
     align: "right",
   });
@@ -167,7 +167,7 @@ export function drawPfpFrame(context) {
 
   drawText(context, "FRAME IN GOA", 80, 983, {
     font: "700 15px Arial, sans-serif",
-    color: "#b8ffe1",
+    color: "#ffe719",
     tracking: 3,
   });
   drawText(context, "247 BUILDERS / 04 DAYS / ONE COASTLINE", 1000, 983, {
