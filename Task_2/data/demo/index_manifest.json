@@ -1,0 +1,13 @@
+{
+  "dataset": "bundled demo subset",
+  "embedding_model": "intfloat/multilingual-e5-small",
+  "embedding_backend": "hash",
+  "chunking_strategy": "semantic",
+  "created_at": "2026-08-17T13:36:55.723803+00:00",
+  "document_count": 3,
+  "chunk_count": 3,
+  "languages": ["en", "hi"],
+  "index_version": "1",
+  "contains_secrets": false,
+  "note": "Manifest for the reproducible demo index only; it is not an MSMARCO-XI production index."
+}
