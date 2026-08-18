@@ -934,8 +934,12 @@ security-report.json
 *.pid
 *.pid.lock
 
-core
-core.*
+__pycache__/
+*.py[cod]
+
+*.core
+core.dump
+core.dmp
 
 # Required small reproducible fixtures; large raw/processed/index artefacts remain ignored.
 !data/
