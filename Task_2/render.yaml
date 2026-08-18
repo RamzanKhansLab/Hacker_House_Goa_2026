@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: goa-voice-rag-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DEMO_MODE
+        value: "true"
+      - key: PYTHON_VERSION
+        value: 3.11.9

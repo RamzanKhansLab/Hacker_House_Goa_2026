@@ -1,6 +1,6 @@
 # Hacker House Goa 2026
 
-> **World's Largest AI × Crypto Hacker House**  
+> **World's Largest AI × Crypto Hacker House**
 > Goa, India · 2026
 
 A central repository containing my projects, experiments, task submissions, prototypes, and deployments built for **Hacker House Goa 2026**.
@@ -97,7 +97,7 @@ The exact folder structure will evolve as new tasks and challenges are released.
 
 | Task | Description | Status | Demo | Source |
 |---|---|---|---|---|
-| Task 01 | TBD | 🔲 Pending | — | — |
+| Task 01 | [Docs](https://docs.google.com/document/d/1RgrIWTVHjG6-qfAVjgcbjj7Mn5yCo_5mBEHPoFdkrKY/edit?usp=sharing) | ✅  Pending | [Website](https://hacker-house-goa-2026-orcin.vercel.app/) | [Github](https://github.com/RamzanKhansLab/Hacker_House_Goa_2026/tree/main/Task_1) |
 | Task 02 | TBD | 🔲 Pending | — | — |
 | Task 03 | TBD | 🔲 Pending | — | — |
 | Task 04 | TBD | 🔲 Pending | — | — |
@@ -526,11 +526,11 @@ It is to create a collection of **real, documented, deployable products** built 
 
 **Hacker House Goa 2026**
 
-**Focus:** AI × Crypto  
-**Location:** Goa, India  
-**Format:** 4-day builder residency  
-**Builders:** 247  
-**Registrations:** 10,000+  
+**Focus:** AI × Crypto
+**Location:** Goa, India
+**Format:** 4-day builder residency
+**Builders:** 247
+**Registrations:** 10,000+
 **Bounties:** $50,000+
 
 Powered by **2:47PM Studio**.
@@ -539,7 +539,7 @@ Powered by **2:47PM Studio**.
 
 ## Repository
 
-**GitHub:**  
+**GitHub:**
 https://github.com/RamzanKhansLab/Hacker_House_Goa_2026
 
 ---
