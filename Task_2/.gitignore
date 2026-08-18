@@ -936,3 +936,11 @@ security-report.json
 
 core
 core.*
+
+# Required small reproducible fixtures; large raw/processed/index artefacts remain ignored.
+!data/
+data/*
+!data/demo/
+!data/demo/*.jsonl
+!data/demo/index_manifest.json
+!.env.example

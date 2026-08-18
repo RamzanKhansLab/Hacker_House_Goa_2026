@@ -3,8 +3,8 @@
 - [ ] GitHub repository URL
 - [ ] Live API URL and health/readiness check
 - [ ] Hosted frontend URL
-- [ ] Dataset/index/model manifest included or linked safely
-- [ ] Current benchmark CSV/JSON/Markdown generated and labelled with environment
+- [x] Safe demo index/model manifest: `data/demo/index_manifest.json` (no secrets; not a production corpus manifest)
+- [x] Demo benchmark CSV/JSON/Markdown generated locally (100 queries; explicitly not representative MSMARCO-XI evaluation)
 - [ ] Team/process video
 - [ ] End-to-end demo video
 - [ ] Every team member posts both videos on Instagram, X, and LinkedIn
