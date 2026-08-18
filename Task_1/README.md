@@ -1,114 +1,200 @@
 # HH Goa 2026 — Builder Frame Generator
 
-A focused, mobile-first Frame / ID Card Generator for the Hacker House Goa 2026 shortlisting task.
+A mobile-first Frame / ID Card Generator for the Hacker House Goa 2026 shortlisting task.
 
-**Live URL:** Not deployed from this workspace yet. The project is deployment-ready once the frontend and share API URLs are configured.
+**Live URL:** https://hacker-house-goa-2026-orcin.vercel.app/
 
-## What is implemented
+## Implemented product
 
-- Format A: a polished 1080 × 1080 PFP frame, composed around the uploaded photo.
-- Format B: a builder ID card with name, role, stack, and local builder-title selection.
-- Local JPG, JPEG, PNG, HEIC, and HEIF processing. HEIC/HEIF conversion is performed in the browser with `heic2any`.
-- Cover-style crop rendering with zoom, horizontal, vertical, and reset controls.
-- Real PNG download using `canvas.toBlob()`.
-- Native file sharing where the browser supports it, with the required `#FrameInGoa` caption.
-- X fallback that uploads only the generated PNG, creates an expiring share URL, and opens an editable X intent.
-- A share page with per-image Open Graph and Twitter image metadata.
-- Express payload validation, PNG signature verification, 15-minute request rate limits, temporary storage, MongoDB TTL metadata, and a no-Mongo local-development fallback.
+- 1080 × 1080 PFP frame and Builder ID Card formats.
+- Local JPG, JPEG, PNG, HEIC, and HEIF processing with browser-side HEIC conversion.
+- Cover crop, zoom, horizontal/vertical position controls, and live Canvas preview.
+- Real PNG export using `canvas.toBlob()`.
+- Native file sharing where supported, plus an editable X fallback containing `#FrameInGoa`.
+- Per-share Open Graph and X metadata for the generated image.
+- Payload validation, PNG signature verification, rate limits, and temporary share metadata.
 
-The normal upload-to-render path never sends the original photo to the server.
+The original uploaded photo stays in the browser. Only the final generated PNG is sent to the API when a user needs the X share-link fallback.
 
-## Architecture
+## Production architecture
 
 ```text
-Photo (browser)
-  → HEIC conversion when needed
-  → crop calculator + Canvas renderer
-  → 1080px PNG preview/download
-  └→ optional share fallback → Express API → temporary PNG + metadata → /share/:slug
+Vercel (React/Vite)
+       │ VITE_API_BASE_URL
+       ▼
+Render Free Web Service (Express)
+       ├── MongoDB Atlas: temporary /share/:slug metadata + TTL index
+       └── Cloudflare R2: temporary generated PNGs + public custom image domain
 ```
 
-`client/` is a React + Vite + Tailwind CSS application. Rendering is deliberately independent of React in `client/src/renderer/`.
-
-`server/` is an Express service. Its `storageService` is a local temporary-storage adapter with `upload`, `delete`, and `getPublicUrl` operations; it can be replaced with an R2/S3 adapter without changing the API/controller layer. MongoDB is used for share metadata when `MONGODB_URI` is configured; the `expiresAt` TTL index removes records automatically, while the local adapter cleans matching expired image files by age.
+Render runs the API only; it does **not** store generated images. The R2 adapter keeps the existing `storageService` contract (`initialize`, `upload`, `delete`, `getPublicUrl`, `cleanupExpiredFiles`) so controllers do not use the AWS SDK directly.
 
 ## Project structure
 
 ```text
 Task_1/
-├── client/                 # React, Vite, Tailwind, Canvas composition
-│   └── src/
-│       ├── components/     # Upload, editor, preview, fields
-│       ├── hooks/          # image upload, renderer, share state
-│       ├── renderer/       # crop, frame, ID-card, canvas modules
-│       └── services/       # share API client
-├── server/                 # Express temporary-share service
-│   └── src/
-│       ├── controllers/
-│       ├── models/
-│       ├── services/
-│       └── utils/
-├── .env.example
-└── package.json
+├── client/                   # React, Vite, Tailwind and Canvas renderer
+├── server/                   # Express API, MongoDB model and R2 storage adapter
+├── render.yaml               # Render Free API Blueprint (no persistent disk)
+├── vercel.json               # Vercel static-site build configuration
+├── .env.example              # Safe combined local-development example
+└── .nvmrc                    # Node 22.14.0
 ```
 
-## Run locally
+## Local development
 
-Requirements: Node.js 20.19+ (Node 22 is also supported) and npm.
+Requirements: Node.js 22.14+ and npm.
 
-```bash
+```powershell
 cd Task_1
-npm install
-copy client\.env.example client\.env
-copy server\.env.example server\.env
+npm ci
+Copy-Item .env.example .env
+Copy-Item client/.env.example client/.env
 npm run dev
 ```
 
-The client runs at `http://localhost:5173` and the API at `http://localhost:8787`.
+The root `Task_1/.env` is read by the API. Create it from `.env.example` for offline/local work; that template sets `STORAGE_PROVIDER=local` explicitly and stores temporary share PNGs under `server/generated/`. This provider is blocked when `NODE_ENV=production`.
 
-For PowerShell, use `Copy-Item client/.env.example client/.env` and the matching server command. A MongoDB connection is optional in development: without it, temporary share records remain in memory until the API restarts or the expiry window elapses.
+For an R2-backed local API instead, change only these values in your uncommitted `.env`:
+
+```env
+STORAGE_PROVIDER=r2
+R2_ACCOUNT_ID=your_cloudflare_account_id
+R2_ACCESS_KEY_ID=your_r2_access_key_id
+R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
+R2_BUCKET_NAME=hh-goa-share-images
+R2_PUBLIC_BASE_URL=https://images.your-domain.com
+# Optional; derived from R2_ACCOUNT_ID if omitted
+R2_ENDPOINT=https://your_cloudflare_account_id.r2.cloudflarestorage.com
+```
 
 ## Environment variables
 
-| Variable | Used by | Purpose |
-| --- | --- | --- |
-| `VITE_API_BASE_URL` | client | Public share API base URL; use the deployed Express URL for split hosting. |
-| `PORT` | server | Express port. |
-| `CLIENT_URL` | server | Comma-separated origins allowed to call the share API. |
-| `PUBLIC_SERVER_URL` | server | Public HTTPS base URL used in returned share and OG image URLs. |
-| `MONGODB_URI` | server | Managed MongoDB connection for share metadata and the TTL index. |
-| `SHARE_TTL_HOURS` | server | Retention window for generated share images, from 1 to 168 hours. |
-| `SHARE_STORAGE_DIRECTORY` | server | Temporary local storage directory; replace the adapter for object storage in production. |
+| Variable | Runtime | Required | Purpose |
+| --- | --- | --- | --- |
+| `VITE_API_BASE_URL` | Vercel/client | Yes in split deployment | Public Render API URL, no trailing slash. |
+| `NODE_ENV` | Render/server | Yes | Set to `production`. |
+| `CLIENT_URL` | Render/server | Yes | Public Vercel frontend URL. Supports comma-separated origins. |
+| `PUBLIC_SERVER_URL` | Render/server | Yes | Public Render API URL; used to build `/share/:slug` links. |
+| `MONGODB_URI` | Render/server | Yes | Atlas connection string for expiring share metadata. |
+| `SHARE_TTL_HOURS` | Render/server | Yes | Share expiry from 1–168 hours; default `24`. |
+| `STORAGE_PROVIDER` | Render/server | Yes | Must be `r2` in production. `local` is development-only. |
+| `R2_ACCOUNT_ID` | Render/server | Yes | Cloudflare Account ID. |
+| `R2_ACCESS_KEY_ID` | Render/server | Yes | Scoped R2 S3 API token access key. |
+| `R2_SECRET_ACCESS_KEY` | Render/server | Yes | Scoped R2 S3 API token secret. |
+| `R2_BUCKET_NAME` | Render/server | Yes | R2 bucket that holds generated share PNGs. |
+| `R2_PUBLIC_BASE_URL` | Render/server | Yes | HTTPS public custom bucket domain, no trailing slash. |
+| `R2_ENDPOINT` | Render/server | Optional | Defaults to `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`. |
 
-Never commit `.env` files or provider credentials.
+Never commit `.env` files, MongoDB connection strings, R2 access keys, or R2 secrets. Values beginning with `VITE_` are exposed to browser builds—do not use that prefix for server credentials.
 
-## Commands
+## Cloudflare R2 setup
 
-```bash
-npm run dev      # client and API together
-npm run build    # production Vite build
-npm test         # crop/file validation and share-payload tests
-npm run start    # run the Express share API
+1. Sign in to Cloudflare and select the correct account.
+2. Open **R2 Object Storage → Create bucket**.
+3. Name it `hh-goa-share-images` and create it.
+4. Open the bucket → **Settings → Custom Domains → Add**.
+5. Attach a domain such as `images.your-domain.com`, then wait until it becomes **Active**. The domain must belong to a Cloudflare zone in the same account.
+6. Use `https://images.your-domain.com` as `R2_PUBLIC_BASE_URL`. Do not use the S3 API endpoint as the public image URL.
+7. In **R2 → Manage API Tokens**, create an **Account API Token**:
+   - Permissions: **Object Read & Write**.
+   - Scope: only the `hh-goa-share-images` bucket.
+   - Copy the Access Key ID and Secret Access Key immediately; the secret is displayed only once.
+8. Copy the Cloudflare Account ID from the dashboard and set `R2_ACCOUNT_ID`.
+9. In the bucket, configure an object lifecycle rule to delete objects with the `generated/` prefix after **2 days**. The app removes known expired images hourly; the lifecycle rule safely cleans up any orphaned object.
+
+The bucket must allow public **read** access through the custom domain so X/Open Graph crawlers can fetch each generated image. Do not expose R2 API credentials or enable public write access.
+
+## Deploy the API on Render Free
+
+The included [`render.yaml`](./render.yaml) targets the Render Free tier and intentionally has no disk configuration.
+
+1. Push `Task_1` to GitHub.
+2. In Render, select **New → Blueprint** and connect this repository.
+3. Set the Blueprint file path to `Task_1/render.yaml`.
+4. Apply the Blueprint. It creates `hh-goa-frame-api` in Singapore with:
+
+   ```text
+   Root directory: Task_1
+   Build command: npm ci
+   Start command: npm run start --workspace=@hh-goa/frame-server
+   Health check: /health
+   Plan: Free
+   ```
+
+5. In the Render service **Environment** page, fill every `sync: false` variable from the table above:
+
+   ```env
+   CLIENT_URL=https://your-vercel-project.vercel.app
+   PUBLIC_SERVER_URL=https://hh-goa-frame-api.onrender.com
+   MONGODB_URI=mongodb+srv://...
+   R2_ACCOUNT_ID=...
+   R2_ACCESS_KEY_ID=...
+   R2_SECRET_ACCESS_KEY=...
+   R2_BUCKET_NAME=hh-goa-share-images
+   R2_PUBLIC_BASE_URL=https://images.your-domain.com
+   # Leave R2_ENDPOINT empty to use the derived R2 endpoint, or set it explicitly.
+   ```
+
+   `NODE_ENV=production`, `STORAGE_PROVIDER=r2`, `SHARE_TTL_HOURS=24`, and `NODE_VERSION=22.14.0` are already non-secret defaults in the Blueprint.
+
+6. Deploy and open:
+
+   ```text
+   https://hh-goa-frame-api.onrender.com/health
+   ```
+
+   Expected response:
+
+   ```json
+   {"status":"ok","storage":"r2"}
+   ```
+
+7. Render Free services can spin down during inactivity. The first request after idle can be slow; it does not affect the browser-local frame generation, only the optional X share-link fallback.
+
+## Deploy the frontend on Vercel
+
+1. In Vercel, select **Add New → Project** and import the same repository.
+2. Set **Root Directory** to `Task_1`.
+3. Vercel reads [`vercel.json`](./vercel.json), which configures:
+
+   ```text
+   Install command: npm ci
+   Build command: npm run build
+   Output directory: client/dist
+   ```
+
+4. Set this production environment variable before the first build:
+
+   ```env
+   VITE_API_BASE_URL=https://hh-goa-frame-api.onrender.com
+   ```
+
+5. Deploy. Copy the Vercel URL.
+6. Return to Render and set `CLIENT_URL` to that exact Vercel URL, then redeploy the API.
+7. If the Render API URL changes, update `VITE_API_BASE_URL` in Vercel and redeploy the frontend.
+
+## MongoDB Atlas setup
+
+1. Create an Atlas project and a free/shared cluster.
+2. Create a database user limited to the `hh_goa` database with `readWrite` access.
+3. In **Network Access**, permit the Render service. For a simple hackathon deployment without a fixed outbound IP, use `0.0.0.0/0` only with a long, unique database password and least-privilege user.
+4. Copy the `mongodb+srv://` connection string, include the `hh_goa` database name, and set it as `MONGODB_URI` in Render.
+5. Confirm the Render log says `MongoDB connected for temporary share metadata.`
+
+## Verification commands
+
+```powershell
+cd Task_1
+npm ci
+npm test
+npm run build
 ```
 
-## Deployment
-
-Deploy `client/` to a static host and `server/` to a Node host, then set:
-
-1. `VITE_API_BASE_URL` to the public Express URL before building the client.
-2. `CLIENT_URL` on the API to the public client URL.
-3. `PUBLIC_SERVER_URL` on the API to its own public HTTPS URL.
-4. `MONGODB_URI` to a managed MongoDB instance.
-5. Replace `server/src/services/storageService.js` with an R2/S3 implementation for durable, cross-instance temporary assets. Keep the same three-method interface.
-
-The static client needs no photo-upload backend. Only a user choosing the desktop/X link fallback uploads the final generated PNG.
-
-## Verification scope
-
-Automated tests cover the crop placement algorithm, client file validation, and server-side share payload verification. Build and server smoke-test results are recorded in the implementation handoff after dependencies are installed.
+Before submission, test the deployed Vercel URL with JPG, PNG, and a real iPhone HEIC image. Then test the Share to X fallback, open the returned `/share/:slug` URL in an incognito window, and confirm its page source contains `og:image`, `og:title`, and `og:description` pointing to the R2 custom domain.
 
 ## Known limitations
 
-- Browser HEIC decoding is implemented client-side, but real-device verification still matters because iOS/browser codec support varies.
-- Direct X image posting is controlled by X and browser platform policy. The application uses native file sharing where available; otherwise it uses an expiring OG share link and editable X intent.
-- The included local storage adapter is suitable for local development and a single ephemeral API instance. A production multi-instance deployment should use the documented object-storage adapter replacement.
+- A real iPhone HEIC upload must still be verified on a physical iOS device after deployment.
+- Direct X posting is controlled by browser/X platform policies. Native file sharing is used where supported; otherwise the product opens an editable X intent with an expiring OG link.
+- Render Free can cold-start after inactivity. The primary generator remains fast because all composition happens in the browser.

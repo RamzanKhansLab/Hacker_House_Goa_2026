@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "Hacker House Goa 2026 Frame / ID Card Generator",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "workspaces": [
     "client",
     "server"
