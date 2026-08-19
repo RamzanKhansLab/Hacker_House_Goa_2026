@@ -867,7 +867,6 @@ llm_config.json
 # NOTEBOOK / EXPERIMENT OUTPUT
 # ============================================================
 
-*.html
 *.csv
 *.jsonl
 
