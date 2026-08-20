@@ -10,6 +10,26 @@ from app.core.errors import ConfigurationError, ServiceError
 from app.schemas.models import TranscriptResponse
 from app.services.stt.base import SpeechToTextProvider
 
+_SARVAM_LANGUAGE_CODES = {
+    "as": "as-IN", "bn": "bn-IN", "en": "en-IN", "gu": "gu-IN", "hi": "hi-IN",
+    "kn": "kn-IN", "ml": "ml-IN", "mr": "mr-IN", "ne": "ne-IN", "or": "od-IN",
+    "pa": "pa-IN", "sa": "sa-IN", "ta": "ta-IN", "te": "te-IN", "ur": "ur-IN",
+}
+
+
+def sarvam_language_code(language_hint: str | None) -> str:
+    """Convert UI language hints to Sarvam's documented BCP-47 values.
+
+    ``unknown`` is intentional: Saaras then detects the language from the
+    supplied audio instead of inheriting a previous UI selection.
+    """
+    if not language_hint:
+        return "unknown"
+    normalized = language_hint.strip()
+    if not normalized or normalized.lower() == "unknown":
+        return "unknown"
+    return _SARVAM_LANGUAGE_CODES.get(normalized.lower(), normalized)
+
 
 class SarvamSpeechToTextProvider(SpeechToTextProvider):
     """Sarvam Saaras v3 REST adapter for short (up to 30s) audio uploads."""
@@ -27,9 +47,11 @@ class SarvamSpeechToTextProvider(SpeechToTextProvider):
         self, filename: str, content: bytes, content_type: str | None, language_hint: str | None = None
     ) -> TranscriptResponse:
         start = time.perf_counter()
-        data: dict[str, str] = {"model": self.model, "mode": self.mode}
-        if language_hint:
-            data["language_code"] = language_hint
+        data: dict[str, str] = {
+            "model": self.model,
+            "mode": self.mode,
+            "language_code": sarvam_language_code(language_hint),
+        }
         files = {"file": (filename, content, content_type or "application/octet-stream")}
         for attempt in range(2):
             try:
@@ -46,8 +68,8 @@ class SarvamSpeechToTextProvider(SpeechToTextProvider):
                     raise ServiceError("Speech recognition returned an empty transcript", status_code=502)
                 return TranscriptResponse(
                     transcript=transcript,
-                    language=str(payload.get("language_code") or language_hint or "unknown"),
-                    confidence=float(payload.get("confidence", 0.0) or 0.0),
+                    language=str(payload.get("language_code") or "unknown"),
+                    confidence=float(payload.get("language_probability") or payload.get("confidence") or 0.0),
                     provider="sarvam",
                     latency_ms=(time.perf_counter() - start) * 1000,
                 )

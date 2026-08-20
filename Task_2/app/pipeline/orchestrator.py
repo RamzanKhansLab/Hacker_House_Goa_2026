@@ -63,7 +63,7 @@ class RAGOrchestrator:
         request_id = str(uuid.uuid4())
         latency = LatencyBreakdown()
         preprocessing_start = time.perf_counter()
-        analysis = self.analyzer.analyze(query, language)
+        analysis = self.analyzer.analyze(query[: self.settings.max_query_chars], language)
         latency.preprocessing_ms = (time.perf_counter() - preprocessing_start) * 1000
         if analysis.classification in {"UNSAFE", "INJECTION_BLOCKED", "AMBIGUOUS"}:
             status = "UNSAFE" if analysis.classification == "UNSAFE" else (
@@ -75,7 +75,7 @@ class RAGOrchestrator:
             )
 
         retrieval_result = await self.retrieval.retrieve(
-            analysis.normalized_query, self.settings.top_k, analysis.language, cross_language
+            analysis.normalized_query, self.settings.retrieve_top_k, analysis.language, cross_language
         )
         latency.embedding_ms = retrieval_result.embedding_ms
         latency.dense_retrieval_ms = retrieval_result.dense_ms

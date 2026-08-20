@@ -27,7 +27,7 @@ def main() -> None:
     settings = Settings(embedding_backend=args.backend or base.embedding_backend, embedding_model=args.model or base.embedding_model)
     records = read_jsonl(source)
     chunks = chunk_records(records, args.strategy)
-    vectors = _create_embedder(settings).embed([chunk.text for chunk in chunks])
+    vectors = _create_embedder(settings).embed_documents([chunk.text for chunk in chunks])
     index = LocalVectorStore()
     index.upsert(chunks, vectors)
     manifest: dict[str, object] = {

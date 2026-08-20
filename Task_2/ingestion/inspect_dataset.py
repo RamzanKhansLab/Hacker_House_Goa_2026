@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from ingestion.io import read_jsonl
 
 
 def main() -> None:
+    # Preserve Indic samples when this command is run from Windows PowerShell.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Inspect an acquired MSMARCO-XI JSONL file without modifying it.")
     parser.add_argument("--input", type=Path, default=Path("data/raw/msmarco_xi.jsonl"))
     args = parser.parse_args()

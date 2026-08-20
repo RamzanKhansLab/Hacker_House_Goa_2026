@@ -1,16 +1,31 @@
 from __future__ import annotations
 
 import math
-import re
+import unicodedata
 from collections import Counter
 
 from app.services.types import Chunk, SearchHit
 
-_WORD = re.compile(r"[\w\u0900-\u0d7f]+", re.UNICODE)
-
 
 def tokenize(text: str) -> list[str]:
-    return _WORD.findall(text.lower())
+    """Split only at separators/punctuation, retaining Indic combining marks.
+
+    Regex ``\w+`` fragments Devanagari vowel signs and virama.  Unicode marks
+    (category ``M``) stay attached to their base character here, so words such
+    as ``दिल्ली`` remain one BM25 token.
+    """
+    tokens: list[str] = []
+    current: list[str] = []
+    for character in text.lower():
+        category = unicodedata.category(character)
+        if category[0] in {"L", "N", "M"}:
+            current.append(character)
+        elif current:
+            tokens.append("".join(current))
+            current = []
+    if current:
+        tokens.append("".join(current))
+    return tokens
 
 
 class BM25Index:

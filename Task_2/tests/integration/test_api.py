@@ -17,3 +17,12 @@ def test_voice_endpoint_uses_demo_stt() -> None:
         response = client.post("/api/v1/voice", files={"audio": ("voice.webm", b"demo-audio", "audio/webm")})
         assert response.status_code == 200
         assert response.json()["transcript"] == "What is retrieval augmented generation?"
+
+
+def test_voice_endpoint_accepts_parameterized_browser_webm_mime_type() -> None:
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/api/v1/voice",
+            files={"audio": ("voice.webm", b"demo-audio", "audio/webm;codecs=opus")},
+        )
+        assert response.status_code == 200

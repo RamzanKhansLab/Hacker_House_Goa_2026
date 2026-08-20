@@ -10,6 +10,7 @@
 .env
 .env.*
 !.env.example
+!frontend/index.html
 !.env.template
 !.env.sample
 
@@ -936,6 +937,9 @@ security-report.json
 
 core
 core.*
+
+# Vite application entry point is source, not a generated HTML report.
+!frontend/index.html
 
 # Required small reproducible fixtures; large raw/processed/index artefacts remain ignored.
 !data/

@@ -34,12 +34,12 @@ class RetrievalEngine:
         self, query: str, limit: int, language: str | None, cross_language: bool
     ) -> RetrievalResult:
         start = time.perf_counter()
-        vector = await asyncio.to_thread(self.embedder.embed, [query])
+        vector = await asyncio.to_thread(self.embedder.embed_query, query)
         embedding_ms = (time.perf_counter() - start) * 1000
 
         async def dense_path() -> tuple[list[SearchHit], float]:
             stage_start = time.perf_counter()
-            hits = await asyncio.to_thread(self.store.search, vector[0], limit, language, cross_language)
+            hits = await asyncio.to_thread(self.store.search, vector, limit, language, cross_language)
             return hits, (time.perf_counter() - stage_start) * 1000
 
         async def lexical_path() -> tuple[list[SearchHit], float]:
