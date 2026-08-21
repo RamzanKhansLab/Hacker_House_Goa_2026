@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     embedding_backend: str = "hash"
     embedding_model: str = "intfloat/multilingual-e5-small"
     vector_store: str = "local"
+    hnsw_m: int = Field(default=32, ge=4, le=64)
+    hnsw_ef_construction: int = Field(default=200, ge=16, le=1000)
+    hnsw_ef_search: int = Field(default=96, ge=8, le=1000)
+    rrf_k: int = Field(default=60, ge=1, le=500)
     qdrant_url: str | None = None
     qdrant_api_key: str | None = None
     qdrant_collection: str = "msmarco_xi"
