@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /service
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir -e ".[ml]"
 COPY . ./
 RUN useradd --create-home appuser && chown -R appuser:appuser /service
 USER appuser

@@ -938,6 +938,12 @@ security-report.json
 core
 core.*
 
+!app/core/
+!app/core/**
+
+
+__pycache__/
+*.pyc
 # Vite application entry point is source, not a generated HTML report.
 !frontend/index.html
 
