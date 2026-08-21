@@ -22,11 +22,17 @@ class Settings(BaseSettings):
     embedding_backend: str = "hash"
     embedding_model: str = "intfloat/multilingual-e5-small"
     vector_store: str = "local"
+    hnsw_m: int = Field(default=32, ge=4, le=64)
+    hnsw_ef_construction: int = Field(default=200, ge=16, le=1000)
+    hnsw_ef_search: int = Field(default=96, ge=8, le=1000)
+    rrf_k: int = Field(default=60, ge=1, le=500)
     qdrant_url: str | None = None
     qdrant_api_key: str | None = None
     qdrant_collection: str = "msmarco_xi"
-    top_k: int = Field(default=8, ge=1, le=32)
-    rerank_top_k: int = Field(default=4, ge=1, le=16)
+    retrieve_top_k: int = Field(default=50, ge=1, le=100)
+    rerank_top_k: int = Field(default=8, ge=1, le=32)
+    grounding_threshold: float = Field(default=0.45, ge=0, le=1)
+    max_query_chars: int = Field(default=512, ge=32, le=1000)
     max_context_tokens: int = Field(default=900, ge=100, le=4000)
     reranker_enabled: bool = True
     min_retrieval_score: float = Field(default=0.08, ge=0, le=1)
@@ -34,7 +40,9 @@ class Settings(BaseSettings):
     sarvam_api_key: str | None = None
     sarvam_base_url: str = "https://api.sarvam.ai"
     sarvam_stt_model: str = "saaras:v3"
-    sarvam_stt_mode: str = "codemix"
+    # Preserve what the speaker said in its original language.  ``codemix``
+    # remains available as an explicit deployment choice.
+    sarvam_stt_mode: str = "transcribe"
     stt_timeout_seconds: float = Field(default=20, ge=1, le=60)
     max_audio_size_mb: int = Field(default=8, ge=1, le=30)
 

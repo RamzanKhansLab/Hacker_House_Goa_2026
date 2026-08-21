@@ -1,8 +1,8 @@
-# Konkan RAG — Hacker House Goa 2026 Task 2
+# VAANI AI — Hacker House Goa 2026 Task 2
 
-Konkan RAG is a voice-enabled, multilingual Retrieval-Augmented Generation (RAG) system built for Indic-language knowledge retrieval. It accepts typed or spoken questions, transcribes audio with Sarvam Saaras v3 in production, retrieves from a metadata-aware hybrid index, validates grounding, and returns concise answers with evidence and stage-by-stage latency.
+VAANI AI is a voice-enabled, multilingual Retrieval-Augmented Generation (RAG) system built for Indic-language knowledge retrieval: **Knowledge, heard. Answers, grounded.** It accepts typed or spoken questions, transcribes audio with Sarvam Saaras v3 in production, retrieves from a metadata-aware hybrid index, validates grounding, and returns concise answers with evidence and stage-by-stage latency.
 
-The repository runs out of the box in **demo mode**: a bundled, deterministic local index, mock STT, and context-only mock generator make the API, UI, tests, and benchmark usable without credentials. Production data preparation is an offline command; the API never downloads or embeds MSMARCO-XI at startup.
+The repository runs out of the box in **demo mode**: a bundled, deterministic local index, mock STT, and context-only mock generator make the API, UI, tests, and benchmark usable without credentials. The VAANI voice panel uses a browser-native microphone waveform, displays the authoritative REST transcription only after recording stops, and then calls the existing combined voice-to-RAG API. Production data preparation is an offline command; the API never downloads or embeds MSMARCO-XI at startup.
 
 ## What is implemented
 
@@ -92,7 +92,7 @@ The resulting `data/index/index.json` and its manifest are intentionally ignored
 
 ## Provider configuration
 
-Production STT uses `SARVAM_API_KEY`, `SARVAM_BASE_URL`, `SARVAM_STT_MODEL=saaras:v3`, and `SARVAM_STT_MODE=codemix`. Sarvam REST is intended for short audio; route long recordings through an asynchronous/batch workflow outside this request path.
+Production STT uses `SARVAM_API_KEY`, `SARVAM_BASE_URL`, `SARVAM_STT_MODEL=saaras:v3`, and `SARVAM_STT_MODE=transcribe`. `transcribe` preserves the speaker's language; use `codemix` only when that output format is intentionally needed. Sarvam REST is intended for short audio; route long recordings through an asynchronous/batch workflow outside this request path.
 
 For generation set `DEMO_MODE=false`, `LLM_PROVIDER=openai_compatible`, `LLM_BASE_URL`, `LLM_API_KEY`, and `LLM_MODEL`. For Qdrant set `VECTOR_STORE=qdrant`, `QDRANT_URL`, `QDRANT_API_KEY`, and `QDRANT_COLLECTION`; retain a local persisted index for BM25 and fallback data.
 

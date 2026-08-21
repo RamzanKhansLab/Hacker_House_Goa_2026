@@ -19,7 +19,7 @@ def main() -> None:
     args = parser.parse_args()
     settings = Settings(embedding_backend=args.backend or Settings().embedding_backend, embedding_model=args.model or Settings().embedding_model)
     chunks = [Chunk.from_dict(row) for row in read_jsonl(args.input)]
-    vectors = _create_embedder(settings).embed([chunk.text for chunk in chunks])
+    vectors = _create_embedder(settings).embed_documents([chunk.text for chunk in chunks])
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps({"dimension": len(vectors[0]) if vectors else 0, "vectors": vectors}), encoding="utf-8")
     print(f"Embedded {len(vectors)} chunks to {args.output}")

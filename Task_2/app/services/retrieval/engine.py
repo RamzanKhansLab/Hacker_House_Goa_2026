@@ -25,21 +25,22 @@ class RetrievalResult:
 class RetrievalEngine:
     """Runs dense and lexical paths concurrently, then applies RRF."""
 
-    def __init__(self, store: VectorStore, embedder: EmbeddingProvider, chunks: list[Chunk]) -> None:
+    def __init__(self, store: VectorStore, embedder: EmbeddingProvider, chunks: list[Chunk], rrf_k: int = 60) -> None:
         self.store = store
         self.embedder = embedder
         self.bm25 = BM25Index(chunks)
+        self.rrf_k = rrf_k
 
     async def retrieve(
         self, query: str, limit: int, language: str | None, cross_language: bool
     ) -> RetrievalResult:
         start = time.perf_counter()
-        vector = await asyncio.to_thread(self.embedder.embed, [query])
+        vector = await asyncio.to_thread(self.embedder.embed_query, query)
         embedding_ms = (time.perf_counter() - start) * 1000
 
         async def dense_path() -> tuple[list[SearchHit], float]:
             stage_start = time.perf_counter()
-            hits = await asyncio.to_thread(self.store.search, vector[0], limit, language, cross_language)
+            hits = await asyncio.to_thread(self.store.search, vector, limit, language, cross_language)
             return hits, (time.perf_counter() - stage_start) * 1000
 
         async def lexical_path() -> tuple[list[SearchHit], float]:
@@ -49,7 +50,7 @@ class RetrievalEngine:
 
         (dense, dense_ms), (lexical, lexical_ms) = await asyncio.gather(dense_path(), lexical_path())
         fusion_start = time.perf_counter()
-        fused = reciprocal_rank_fusion([dense, lexical], limit)
+        fused = reciprocal_rank_fusion([dense, lexical], limit, self.rrf_k)
         return RetrievalResult(
             dense=dense,
             lexical=lexical,

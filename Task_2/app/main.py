@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
-        title="Goa Voice RAG API",
+        title="VAANI AI API",
         version="0.1.0",
         description="Multilingual hybrid RAG with Sarvam STT and deterministic guardrails.",
         lifespan=lifespan,

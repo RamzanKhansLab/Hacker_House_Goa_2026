@@ -8,6 +8,14 @@ class ServiceError(Exception):
         self.status_code = status_code
 
 
+class ConfigurationError(ServiceError):
+    def __init__(self, message: str) -> None:
+        super().__init__(message, code="configuration_error", status_code=503)
+
+
+class InvalidAudioError(ServiceError):
+    def __init__(self, message: str) -> None:
+        super().__init__(message, code="invalid_audio", status_code=422)
 class InvalidAudioError(ServiceError):
     def __init__(self, message: str) -> None:
         super().__init__(message, code="invalid_audio", status_code=400)

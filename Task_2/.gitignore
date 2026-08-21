@@ -10,6 +10,7 @@
 .env
 .env.*
 !.env.example
+!frontend/index.html
 !.env.template
 !.env.sample
 
@@ -939,6 +940,15 @@ __pycache__/
 *.core
 core.dump
 core.dmp
+
+!app/core/
+!app/core/**
+
+
+__pycache__/
+*.pyc
+# Vite application entry point is source, not a generated HTML report.
+!frontend/index.html
 
 # Required small reproducible fixtures; large raw/processed/index artefacts remain ignored.
 !data/
