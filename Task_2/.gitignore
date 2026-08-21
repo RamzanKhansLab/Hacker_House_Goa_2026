@@ -868,7 +868,6 @@ llm_config.json
 # NOTEBOOK / EXPERIMENT OUTPUT
 # ============================================================
 
-*.html
 *.csv
 *.jsonl
 
@@ -935,8 +934,12 @@ security-report.json
 *.pid
 *.pid.lock
 
-core
-core.*
+__pycache__/
+*.py[cod]
+
+*.core
+core.dump
+core.dmp
 
 !app/core/
 !app/core/**
